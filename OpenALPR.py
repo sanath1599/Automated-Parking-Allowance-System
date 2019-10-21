@@ -3,7 +3,7 @@ import base64
 import json
 import cv2
 import time
-cap = cv2.VideoCapture('video.avi')
+cap = cv2.VideoCapture('trial.mp4')
 car_cascade = cv2.CascadeClassifier('cars.xml')
 while True: 
     # reads frames from a video 
@@ -20,7 +20,7 @@ while True:
     for (x,y,w,h) in cars: 
         cv2.rectangle(frames,(x,y),(x+w,y+h),(0,0,255),2)
         cv2.imwrite('image.jpg', frames)
-        IMAGE_PATH = 'image.jpg'
+        IMAGE_PATH = 'trial.png'
         SECRET_KEY = 'sk_083bb8412c7e4290f5a85348'
 
         with open(IMAGE_PATH, 'rb') as image_file:
@@ -35,11 +35,6 @@ while True:
         time.sleep(5)
   
    # Display frames in a window  
-   cv2.imshow('video2', frames) 
+cv2.imshow('video2', frames) 
       
-    # Wait for Esc key to stop 
-    if cv2.waitKey(33) == 27: 
-        break
-  
-# De-allocate any associated memory usage 
 cv2.destroyAllWindows() 
