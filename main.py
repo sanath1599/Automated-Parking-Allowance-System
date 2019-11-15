@@ -1,12 +1,17 @@
+import requests
+import base64
+import json
+from twilio.rest import Client
 
 import numpy as np
 import cv2
 from copy import deepcopy
 from PIL import Image
 import pytesseract as tess
-
+upload = "HR.jpg"
 def preprocess(img):
 	cv2.imshow("Input",img)
+	callAndSMS()
 	imgBlurred = cv2.GaussianBlur(img, (5,5), 0)
 	gray = cv2.cvtColor(imgBlurred, cv2.COLOR_BGR2GRAY)
 
@@ -131,13 +136,53 @@ def cleanAndRead(img,contours):
 
 	#print "No. of final cont : " , count
 
+def callAndSMS():
+        IMAGE_PATH = upload
+        SECRET_KEY = 'sk_083bb8412c7e4290f5a85348'
+
+        with open(IMAGE_PATH, 'rb') as image_file:
+            img_base64 = base64.b64encode(image_file.read())
+
+        url = 'https://api.openalpr.com/v2/recognize_bytes?recognize_vehicle=1&country=us&secret_key=%s' % (SECRET_KEY)
+        r = requests.post(url, data = img_base64)
+        json_data = json.loads(r.text)
+        #print(json.dumps(r.json(), indent=2))
+        print("Detected Plate: ")
+        res = json_data['results'][0]['plate']
+        print(json_data['results'][0]['plate'])
+        if res!=0:
+            from twilio.rest import Client
+
+
+            # Your Account Sid and Auth Token from twilio.com/console
+            # DANGER! This is insecure. See http://twil.io/secure
+            account_sid = 'ACe7faaeafde1aafc4c694f3b68c1035bc'
+            auth_token = 'fc81ae82e6c7469051947bc5c72a6225'
+            client = Client(account_sid, auth_token)
+
+            message = client.messages \
+                            .create(
+                                 body="Dear Chandana, Your car has been detected entering/leaving the building",
+                                 from_='+12055767580',
+                                 to='+918978238018'
+                             )
+
+            print(message.sid)
+            call = client.calls.create(
+                        url='http://sanathswaroop.com/mini.xml',
+                        to='+919392848111',
+                        from_='+918978238018'
+                    )
+            print(call.sid)
 
 
 if __name__ == '__main__':
 	print ("DETECTING PLATE . . .")
 
 	#img = cv2.imread("testData/Final.JPG")
-	img = cv2.imread("testData/bike.jpg")
+	img = cv2.imread(upload)
+	
+
 
 	threshold_img = preprocess(img)
 	contours= extract_contours(threshold_img)
